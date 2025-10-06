@@ -10,30 +10,12 @@ const getUsuario = () => {
   return require("../models/Usuario");
 };
 
-// Função para verificar autenticação
-const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
-
-  if (!token) {
-    return res.status(401).json({ error: 'Token de acesso necessário' });
-  }
-
-  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) {
-      return res.status(403).json({ error: 'Token inválido' });
-    }
-    req.user = user;
-    next();
-  });
-};
-
 module.exports = {
   // Criar nova tarefa
   createTask: async (req, res) => {
     try {
       const { title } = req.body;
-      const userId = req.user.id;
+      const userId = req.usuario.id; // ← MUDOU: req.user → req.usuario
 
       if (!title) {
         return res.status(400).json({ error: "Título da tarefa é obrigatório" });
@@ -56,7 +38,7 @@ module.exports = {
   // Buscar todas as tarefas do usuário
   getTasks: async (req, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.usuario.id; // ← MUDOU: req.user → req.usuario
       const Tarefa = getTarefa();
 
       const tarefas = await Tarefa.findAll({
@@ -76,7 +58,7 @@ module.exports = {
     try {
       const { id } = req.params;
       const { title, status } = req.body;
-      const userId = req.user.id;
+      const userId = req.usuario.id; // ← MUDOU: req.user → req.usuario
 
       const Tarefa = getTarefa();
       const tarefa = await Tarefa.findOne({
@@ -104,7 +86,7 @@ module.exports = {
   deleteTask: async (req, res) => {
     try {
       const { id } = req.params;
-      const userId = req.user.id;
+      const userId = req.usuario.id; // ← MUDOU: req.user → req.usuario
 
       const Tarefa = getTarefa();
       const tarefa = await Tarefa.findOne({
@@ -122,8 +104,5 @@ module.exports = {
       console.error("Erro ao deletar tarefa:", error);
       res.status(500).json({ error: "Erro interno no servidor" });
     }
-  },
-
-  // Middleware de autenticação
-  authenticateToken
+  }
 };

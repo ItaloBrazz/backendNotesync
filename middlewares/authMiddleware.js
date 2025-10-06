@@ -13,7 +13,7 @@ const authenticateToken = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.usuario = decoded;
+    req.usuario = decoded; // ou req.userId = decoded.id
     next();
   } catch (error) {
     if (error.name === 'TokenExpiredError') {
@@ -28,4 +28,6 @@ const authenticateToken = (req, res, next) => {
   }
 };
 
+// Exportar como default E nomeado
 module.exports = authenticateToken;
+module.exports.authenticateToken = authenticateToken;
