@@ -6,27 +6,9 @@ const sequelize = require("./config/db");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
-const allowedOrigins = [
-  'http://localhost:3000',
-  'http://127.0.0.1:3000', 
-  'http://localhost:8080',
-  'http://127.0.0.1:8080',
-  'file://',
-  process.env.FRONTEND_URL
-].filter(Boolean);
-
+// Middleware CORS - Configurado para aceitar de qualquer origem
 app.use(cors({
-  origin: function (origin, callback) {
-    // Permitir requisições sem origem (mobile apps, Postman, etc)
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error('Origem não permitida pelo CORS'));
-    }
-  },
+  origin: '*', // Em produção, especifique os domínios permitidos
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -35,20 +17,27 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Rota de teste/health check
+// Rota raiz - IMPORTANTE: Deve retornar algo
 app.get("/", (req, res) => {
   res.json({ 
-    message: "Servidor funcionando!",
+    message: "API Task Manager - Servidor funcionando!",
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development'
+    environment: process.env.NODE_ENV || 'production',
+    routes: {
+      auth: '/api/auth',
+      tasks: '/api/tasks',
+      health: '/api/health'
+    }
   });
 });
 
+// Rota de health check
 app.get("/api/health", (req, res) => {
   res.json({ 
     status: "OK",
     database: "connected",
-    uptime: process.uptime()
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString()
   });
 });
 
@@ -64,8 +53,6 @@ async function initializeDatabase() {
     console.log("📋 Modelos carregados: Usuario, Tarefa");
     
     // Sincronizar tabelas
-    // Use { force: true } apenas em desenvolvimento para recriar tabelas
-    // Use { alter: true } para atualizar estrutura sem perder dados
     await sequelize.sync({ alter: true });
     console.log("📦 Tabelas sincronizadas com sucesso");
     
@@ -82,7 +69,17 @@ async function initializeDatabase() {
       res.status(404).json({ 
         error: "Rota não encontrada",
         path: req.path,
-        method: req.method
+        method: req.method,
+        availableRoutes: [
+          'GET /',
+          'GET /api/health',
+          'POST /api/auth/register',
+          'POST /api/auth/login',
+          'GET /api/tasks',
+          'POST /api/tasks',
+          'PUT /api/tasks/:id',
+          'DELETE /api/tasks/:id'
+        ]
       });
     });
     
@@ -109,16 +106,16 @@ async function initializeDatabase() {
       // Erro genérico
       res.status(err.status || 500).json({ 
         error: "Erro interno do servidor",
-        message: process.env.NODE_ENV === 'development' ? err.message : undefined
+        message: process.env.NODE_ENV === 'development' ? err.message : "Ocorreu um erro no servidor"
       });
     });
     
     // Iniciar o servidor
-    const server = app.listen(PORT, () => {
+    const server = app.listen(PORT, '0.0.0.0', () => {
       console.log(`\n${'='.repeat(50)}`);
       console.log(`🚀 Servidor rodando na porta ${PORT}`);
-      console.log(`📍 URL: http://localhost:${PORT}`);
-      console.log(`🌍 Ambiente: ${process.env.NODE_ENV || 'development'}`);
+      console.log(`📍 URL: https://backendnotesync.onrender.com`);
+      console.log(`🌍 Ambiente: ${process.env.NODE_ENV || 'production'}`);
       console.log(`${'='.repeat(50)}\n`);
     });
     
@@ -153,7 +150,6 @@ async function initializeDatabase() {
 // Tratamento de erros não capturados
 process.on('unhandledRejection', (reason, promise) => {
   console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
-  process.exit(1);
 });
 
 process.on('uncaughtException', (error) => {
