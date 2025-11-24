@@ -1,0 +1,60 @@
+name: CI/CD - Backend
+
+on:
+  push:
+    branches: [ main, test-devops ]
+  pull_request:
+    branches: [ main, test-devops ]
+
+jobs:
+  test_and_build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Rodar testes
+        run: npm test
+
+      - name: Build do backend
+        run: npm run build
+
+      - name: Arquivar build como artefato
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-build-${{ github.sha }}
+          path: |
+            dist
+            package.json
+            package-lock.json
+
+  deploy_staging:
+    needs: test_and_build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Baixar artefato do build
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-build-${{ github.sha }}
+          path: ./build-backend
+
+      - name: Disparar deploy em ambiente de homologação
+        env:
+          STAGING_WEBHOOK_URL: ${{ secrets.STAGING_WEBHOOK_URL }}
+        run: |
+          echo "Disparando deploy para o ambiente de homologação..."
+          curl -X POST "$STAGING_WEBHOOK_URL" \
+            -H "Content-Type: application/json" \
+            -d '{"commit":"${{ github.sha }}","repo":"backendNotesync","env":"staging"}'
