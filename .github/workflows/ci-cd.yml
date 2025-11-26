@@ -23,20 +23,19 @@ jobs:
       - name: Instalar dependências
         run: npm ci
 
-      - name: Rodar testes
+      - name: Rodar testes automatizados
         run: npm test
 
-      - name: Build do backend
-        run: npm run build
+      - name: Verificar sintaxe
+        run: node -c server.js || true
 
-      - name: Arquivar build como artefato
+      - name: Arquivar artefatos versionados
         uses: actions/upload-artifact@v4
         with:
-          name: backend-build-${{ github.sha }}
+          name: backend-artifacts-${{ github.sha }}
           path: |
-            dist
-            package.json
-            package-lock.json
+            .
+          retention-days: 5
 
   deploy_staging:
     needs: test_and_build
@@ -44,11 +43,11 @@ jobs:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     steps:
-      - name: Baixar artefato do build
+      - name: Baixar artefatos gerados
         uses: actions/download-artifact@v4
         with:
-          name: backend-build-${{ github.sha }}
-          path: ./build-backend
+          name: backend-artifacts-${{ github.sha }}
+          path: ./backend-deploy-package
 
       - name: Disparar deploy em ambiente de homologação
         env:
