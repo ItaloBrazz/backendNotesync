@@ -1,9 +1,0 @@
-# Copie este conteúdo para criar seu arquivo .env na raiz do projeto
-
-DATABASE_URL=postgresql://neondb_owner:npg_v81BDSuRCctN@ep-cool-cake-ad43u4dl-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
-
-JWT_SECRET=your-super-secret-jwt-key-change-in-production
-
-NODE_ENV=production
-
-

@@ -71,3 +71,4 @@ Write-Host "💡 Para usar no Render, configure a Image URL como:" -ForegroundCo
 Write-Host "   $DockerUsername/$AUTH_SERVICE`:$Tag"
 Write-Host "   $DockerUsername/$TASKS_SERVICE`:$Tag"
 
+

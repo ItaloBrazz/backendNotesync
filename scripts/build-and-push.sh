@@ -69,3 +69,4 @@ echo "💡 Para usar no Render, configure a Image URL como:"
 echo "   $DOCKER_USERNAME/$AUTH_SERVICE:$TAG"
 echo "   $DOCKER_USERNAME/$TASKS_SERVICE:$TAG"
 
+
