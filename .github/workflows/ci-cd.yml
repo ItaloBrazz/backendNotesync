@@ -41,6 +41,8 @@ jobs:
     needs: test_and_build
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment:
+      name: homolog
 
     steps:
       - name: Baixar artefatos gerados
