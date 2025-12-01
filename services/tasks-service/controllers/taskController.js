@@ -5,23 +5,36 @@ const getTarefa = () => {
 module.exports = {
   createTask: async (req, res) => {
     try {
-      const { title } = req.body;
+      const { title, description } = req.body;
       const userId = req.usuario.id;
 
       if (!title) {
         return res.status(400).json({ error: "Título da tarefa é obrigatório" });
       }
 
+      // Tratamento da descrição: aceita string vazia, null ou undefined
+      let descriptionValue = null;
+      if (description !== undefined && description !== null) {
+        const trimmed = String(description).trim();
+        descriptionValue = trimmed === '' ? null : trimmed;
+      }
+
+      console.log(`[CreateTask] Criando tarefa - title: "${title}", description: "${descriptionValue}", userId: ${userId}`);
+
       const Tarefa = getTarefa();
       const novaTarefa = await Tarefa.create({
         title,
+        description: descriptionValue,
         userId,
         status: 'todo'
       });
 
+      console.log(`[CreateTask] Tarefa criada com sucesso - id: ${novaTarefa.id}, description: "${novaTarefa.description}"`);
+
       res.status(201).json(novaTarefa);
     } catch (error) {
       console.error("Erro ao criar tarefa:", error);
+      console.error("Detalhes do erro:", error.message, error.stack);
       res.status(500).json({ error: "Erro interno no servidor" });
     }
   },
@@ -67,7 +80,7 @@ module.exports = {
   updateTask: async (req, res) => {
     try {
       const { id } = req.params;
-      const { title, status } = req.body;
+      const { title, description, status } = req.body;
       const userId = req.usuario.id;
 
       const Tarefa = getTarefa();
@@ -81,6 +94,7 @@ module.exports = {
 
       const updateData = {};
       if (title !== undefined) updateData.title = title;
+      if (description !== undefined) updateData.description = description || null;
       if (status !== undefined) updateData.status = status;
 
       await tarefa.update(updateData);

@@ -185,7 +185,23 @@ deploy.log
 services/*/node_modules/
 services/*/.env
 services/*/.env.local
+services/*/.env.*.local
 # package-lock.json dos serviços é versionado
+
+# ============================================
+# Scripts de Serviços - Manter versionados
+# ============================================
+# Scripts úteis em services/*/scripts/ são versionados
+# Apenas ignorar arquivos temporários de scripts
+services/*/scripts/*.tmp
+services/*/scripts/*.bak
+services/*/scripts/*.log
+
+# ============================================
+# Documentação - Manter apenas README.md
+# ============================================
+*.md
+!README.md
 
 # ============================================
 # Exceções - Manter Arquivos de Exemplo
@@ -194,7 +210,22 @@ services/*/.env.local
 !docker-compose.override.yml.example
 
 # ============================================
-# Documentação - Manter apenas README.md
+# Scripts e Migrações - Manter versionados
 # ============================================
-*.md
-!README.md
+# Scripts úteis são versionados
+# Migrações SQL são versionadas se existirem
+# Apenas ignorar arquivos temporários e backups
+
+# ============================================
+# Arquivos de Migração e Backup SQL
+# ============================================
+*.sql.backup
+*.sql.tmp
+*.migration.backup
+
+# ============================================
+# Docker Build Context e Configuração
+# ============================================
+.dockerignore.bak
+docker-compose.*.bak
+docker-compose.override.yml

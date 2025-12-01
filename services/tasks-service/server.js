@@ -1,6 +1,7 @@
 require('dotenv').config();
 const app = require('./app');
 const sequelize = require('./config/db');
+const { DataTypes } = require('sequelize');
 
 const PORT = process.env.PORT || 3002;
 
@@ -25,6 +26,8 @@ async function startServer() {
     
     // Sincronizar modelos
     const Tarefa = require('./models/Tarefa');
+    
+    // Sincronizar tabelas com alterações
     await sequelize.sync({ alter: true });
     console.log('📦 [Tasks Service] Tabelas sincronizadas!');
     

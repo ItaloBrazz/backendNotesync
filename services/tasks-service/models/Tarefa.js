@@ -11,6 +11,10 @@ const Tarefa = sequelize.define("Tarefa", {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  description: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
   status: {
     type: DataTypes.ENUM('todo', 'in_progress', 'done'),
     defaultValue: 'todo',
@@ -24,6 +28,9 @@ const Tarefa = sequelize.define("Tarefa", {
       key: 'id'
     }
   },
+}, {
+  tableName: 'Tarefas', // Nome explícito da tabela
+  timestamps: true, // Garantir que createdAt e updatedAt existem
 });
 
 module.exports = Tarefa;
