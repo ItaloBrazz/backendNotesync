@@ -14,13 +14,29 @@ module.exports = {
         return res.status(400).json({ error: "Todos os campos são obrigatórios" });
       }
 
+      // Validação rápida de email
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ error: "Email inválido" });
+      }
+
+      // Validação de senha mínima
+      if (senha.length < 6) {
+        return res.status(400).json({ error: "Senha deve ter no mínimo 6 caracteres" });
+      }
+
       const Usuario = getUsuario();
-      const usuarioExistente = await Usuario.findOne({ where: { email } });
+      // Query otimizada: busca apenas o campo email (mais rápido)
+      const usuarioExistente = await Usuario.findOne({ 
+        where: { email },
+        attributes: ['id', 'email'] // Buscar apenas campos necessários
+      });
       if (usuarioExistente) {
         return res.status(400).json({ error: "Email já cadastrado" });
       }
 
-      const senhaHash = await bcrypt.hash(senha, 10);
+      // Otimizar bcrypt: usar 8 rounds ao invés de 10 (ainda seguro, mas mais rápido)
+      const senhaHash = await bcrypt.hash(senha, 8);
       const role = email.endsWith("@admin.com") ? "admin" : "user";
 
       const novoUsuario = await Usuario.create({ nome, email, senha: senhaHash, role });

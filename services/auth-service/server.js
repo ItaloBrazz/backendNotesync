@@ -23,9 +23,12 @@ async function startServer() {
       }
     }
     
-    // Sincronizar modelos
+    // Sincronizar modelos (usar force: false para não recriar tabelas existentes)
     const Usuario = require('./models/Usuario');
-    await sequelize.sync({ alter: true });
+    
+    // Sincronizar sem alterar estrutura existente (mais rápido)
+    // alter: false evita verificações pesadas de estrutura
+    await sequelize.sync({ alter: false, force: false });
     console.log('📦 [Auth Service] Tabelas sincronizadas!');
     
     // Registrar rotas
