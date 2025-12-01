@@ -72,3 +72,4 @@ Write-Host "   $DockerUsername/$AUTH_SERVICE`:$Tag"
 Write-Host "   $DockerUsername/$TASKS_SERVICE`:$Tag"
 
 
+
