@@ -15,6 +15,10 @@ const Tarefa = sequelize.define("Tarefa", {
     type: DataTypes.TEXT,
     allowNull: true,
   },
+  deadline: {
+    type: DataTypes.DATE,
+    allowNull: true,
+  },
   status: {
     type: DataTypes.ENUM('todo', 'in_progress', 'done'),
     defaultValue: 'todo',
