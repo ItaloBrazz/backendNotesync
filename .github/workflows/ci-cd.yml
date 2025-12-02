@@ -1,0 +1,62 @@
+name: CI/CD - Backend
+
+on:
+  push:
+    branches: [ main, test-devops ]
+  pull_request:
+    branches: [ main, test-devops ]
+
+jobs:
+  test_and_build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Instalar dependências (Auth Service)
+        working-directory: services/auth-service
+        run: npm install
+
+      - name: Rodar testes (Auth Service)
+        working-directory: services/auth-service
+        run: npm test
+
+      - name: Instalar dependências (Tasks Service)
+        working-directory: services/tasks-service
+        run: npm install
+
+      - name: Rodar testes (Tasks Service)
+        working-directory: services/tasks-service
+        run: npm test
+
+      - name: Arquivar artefatos
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-artifacts-${{ github.sha }}
+          path: |
+            services/auth-service
+            services/tasks-service
+          retention-days: 5
+
+  deploy_staging:
+    needs: test_and_build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment:
+      name: homolog
+
+    steps:
+      - name: Baixar artefatos
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-artifacts-${{ github.sha }}
+          path: ./deploy
+
+      - name: Deploy em homologacao
+        run: echo "Deploy executado com sucesso"
