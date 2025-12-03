@@ -1,5 +1,7 @@
 # NoteSync Backend - Microserviços
 
+![CI/CD](https://github.com/ItaloBrazz/backendNotesync/actions/workflows/ci-cd.yml/badge.svg)
+
 Backend do NoteSync organizado em arquitetura de microserviços com alta disponibilidade, containerizado com Docker.
 
 ## 🏗️ Arquitetura
@@ -21,6 +23,51 @@ Este backend contém:
    - Load balancing entre instâncias
    - Failover automático
    - Porta: 8080
+
+## 🧪 Testes Unitários
+
+O projeto implementa testes automatizados para validar as regras de negócio críticas.
+
+### Executar Testes Localmente
+
+```bash
+# Auth Service
+cd services/auth-service
+npm test
+
+# Tasks Service
+cd services/tasks-service
+npm test
+```
+
+### Cobertura de Testes
+
+- **Auth Service**: 7 testes (validação de email, senha, JWT, registro)
+- **Tasks Service**: 8 testes (validação de tarefas, status, prioridade, autenticação)
+
+Para mais detalhes, consulte [TESTES.md](TESTES.md)
+
+## 🔄 CI/CD
+
+O projeto utiliza **GitHub Actions** para automação de testes e deploy.
+
+### Pipeline Automático
+
+O pipeline executa automaticamente:
+- A cada push nas branches `main`, `test-devops` e `teste`
+- A cada pull request aberto
+
+**Etapas do Pipeline:**
+1. Instala dependências dos serviços
+2. Executa testes unitários
+3. Gera artefatos versionados
+4. Deploy automático em homologação (apenas na branch main)
+
+### Status do Build
+
+Verifique o status das execuções na aba [Actions](../../actions) do repositório.
+
+**Importante:** Pull requests só podem ser aprovados se todos os testes passarem.
 
 ## 📋 Pré-requisitos
 
@@ -147,6 +194,58 @@ curl http://localhost:8080/api/auth/metrics
 # Métricas do Tasks Service
 curl http://localhost:8080/api/tasks/metrics
 ```
+
+## 📊 Monitoramento e Observabilidade
+
+O sistema implementa logs estruturados e metricas de performance para monitoramento continuo.
+
+### Logs Estruturados
+
+Sistema de logs usando Winston com niveis info, warn e error:
+
+```bash
+# Ver logs em tempo real
+docker compose logs -f auth-service-1
+docker compose logs -f tasks-service-1
+
+# Logs salvos em arquivo
+services/auth-service/logs/combined.log
+services/tasks-service/logs/combined.log
+```
+
+### Metricas de Performance
+
+Cada servico expoe metricas em `/metrics`:
+
+- Tempo de uptime
+- Total de requisicoes
+- Taxa de erro
+- Tempo medio de resposta
+
+Consulte [MONITORAMENTO.md](MONITORAMENTO.md) para detalhes completos.
+
+### Monitoramento Continuo
+
+Script que verifica a saude dos servicos periodicamente:
+
+```bash
+cd scripts
+node monitor.js
+```
+
+### Testes de Carga
+
+Executar testes de performance com K6:
+
+```bash
+# Instalar K6
+winget install k6
+
+# Executar teste
+k6 run scripts/load-test.js
+```
+
+O teste simula 4 cenarios de carga: 10, 50, 100 e 1000 requisicoes por segundo.
 
 ## 🐳 Docker Compose
 
