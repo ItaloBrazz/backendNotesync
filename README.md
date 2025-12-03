@@ -195,6 +195,58 @@ curl http://localhost:8080/api/auth/metrics
 curl http://localhost:8080/api/tasks/metrics
 ```
 
+## 📊 Monitoramento e Observabilidade
+
+O sistema implementa logs estruturados e metricas de performance para monitoramento continuo.
+
+### Logs Estruturados
+
+Sistema de logs usando Winston com niveis info, warn e error:
+
+```bash
+# Ver logs em tempo real
+docker compose logs -f auth-service-1
+docker compose logs -f tasks-service-1
+
+# Logs salvos em arquivo
+services/auth-service/logs/combined.log
+services/tasks-service/logs/combined.log
+```
+
+### Metricas de Performance
+
+Cada servico expoe metricas em `/metrics`:
+
+- Tempo de uptime
+- Total de requisicoes
+- Taxa de erro
+- Tempo medio de resposta
+
+Consulte [MONITORAMENTO.md](MONITORAMENTO.md) para detalhes completos.
+
+### Monitoramento Continuo
+
+Script que verifica a saude dos servicos periodicamente:
+
+```bash
+cd scripts
+node monitor.js
+```
+
+### Testes de Carga
+
+Executar testes de performance com K6:
+
+```bash
+# Instalar K6
+winget install k6
+
+# Executar teste
+k6 run scripts/load-test.js
+```
+
+O teste simula 4 cenarios de carga: 10, 50, 100 e 1000 requisicoes por segundo.
+
 ## 🐳 Docker Compose
 
 O `docker-compose.yml` está configurado com:
